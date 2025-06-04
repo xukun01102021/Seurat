@@ -60,8 +60,6 @@ saveRDS(object = scrna ,file = "scrna_filtered.rds")
 
 
 
-
-
 #Standardization, dimensionality, reduction and clustering---
 
 setwd('/data/scrna/01_seurat')
@@ -80,19 +78,15 @@ s_genes <- cc.genes$s.genes
 s_genes <- CaseMatch(search=s_genes, match=rownames(scrna)) 
 scrna[["RNA"]] <- JoinLayers(scrna[["RNA"]])
 scrna <- CellCycleScoring(scrna, g2m.features=g2m_genes, s.features=s_genes)
-
 scrna <- RunPCA(scrna, features = all.genes)
 
 pdf('01_phase.pdf')
 DimPlot(scrna,group.by = 'Phase')
 dev.off()
 
-
 pdf("01_scrna_ElbowPlot.pdf",width = 8,height = 6)
 ElbowPlot(object = scrna,ndims = 50)
 dev.off()
-
-
 
 scrna <- RunHarmony(scrna, "orig.ident")
 scrna <- RunUMAP(scrna, reduction = "harmony",dims = 1: 25)
@@ -106,7 +100,6 @@ pdf("01_harmony_tsne.pdf",width = 14,height = 12)
 DimPlot(object = scrna, reduction = "tsne",group.by = 'orig.ident')
 dev.off()
 
-
 scrna<- FindNeighbors(scrna, reduction = "harmony", dims = 1:25)
 scrna<- FindClusters(scrna, reduction = "harmony", resolution = 1.2)
 
@@ -114,15 +107,11 @@ pdf("01_umap_dimplot.pdf",width = 10,height = 8)
 DimPlot(object = scrna, reduction = "umap",label = T)
 dev.off()
 
-
 scrna.markers <- FindAllMarkers(scrna, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
 top10 <- scrna.markers %>% group_by(cluster) %>% top_n(n = 10, wt = avg_log2FC)
-
 write.csv(scrna.markers,file = "01_markers-seurat_clusters.csv")
 write.csv(top10,file = "01_markers-top10.csv")
 saveRDS(scrna,"scrna_not.rds")
-
-
 
 pdf("01_umap_dimplot.pdf",width = 10,height = 8)
 DimPlot(object = scrna, reduction = "umap",label = T)
@@ -131,7 +120,6 @@ dev.off()
 pdf("01_tsne_dimplot.pdf",width = 10,height = 8)
 DimPlot(object = scrna, reduction = "tsne",label = T)
 dev.off()
-
 
 table(scrna$seurat_clusters)
 av <- AverageExpression(scrna,group.by = "seurat_clusters",assays = "RNA")
@@ -143,9 +131,7 @@ pdf('01_pheatmap_seurat_clusters.pdf',width = 10,height = 10)
 pheatmap::pheatmap(cor(av[cg,],method = 'spearman'))
 dev.off()
 
-
 #Cell population annotation---
-
 cell_markers <- list(
   DC = c("GPR183", "GZMB"),
   B_cells_Plasma = c("IGKC", "JCHAIN"),
@@ -163,7 +149,6 @@ cell_markers <- list(
 
 str(cell_markers)
 
-
 for (cell_type in names(cell_markers)) {
   genes <- cell_markers[[cell_type]]
   num_genes <- length(genes)
@@ -176,7 +161,6 @@ for (cell_type in names(cell_markers)) {
   ggsave(filename = pdf_filename, plot = p, width = width, height = height, units = "in")
 }
 
-
 marker <-  unique(unlist(cell_markers))
 
 pdf('01_cluster_marker_DotPlot.pdf', width = 16, height = 8)
@@ -186,7 +170,6 @@ DotPlot(scrna, features = marker, group.by = 'seurat_clusters') +
   scale_y_discrete("") +
   scale_color_gradientn(colors = c("#2b559c", "#f7f7f7", "#fdae61", "#a31d1f"), values = c(0, 0.4, 0.7, 1))
 dev.off()
-
 
 new.cluster.ids<-c("Fibroblast"	,
                    "NK&T cells"	,
@@ -216,12 +199,10 @@ new.cluster.ids<-c("Fibroblast"	,
                    "Epithelial cells"	,
                    "Smooth muscle cells"	)
 
-
 names(new.cluster.ids)<-levels(scrna)
 scrna<-RenameIdents(scrna,new.cluster.ids)
 scrna[['cell_type']] <- scrna@active.ident
 table(scrna$cell_type)
-
 
 mycolors<- c("#2171B5", "#9ECAE1","#FF7f00","#FDD0A2",
              "#238443","#ADDD8E","#6A51A3","#BCBDDC",
@@ -240,7 +221,6 @@ DimPlot(scrna,reduction = 'umap',label = F,cols = mycolors,group.by = "cell_type
   guides(color = guide_legend(override.aes = list(size = 5)))
 dev.off()
 
-
 pdf('01_Dimplot_tsne_celltype.pdf',width = 6,height = 6)
 DimPlot(scrna,reduction = 'tsne',label = F,cols = mycolors,group.by = "cell_type") +
   #scale_colour_npg() +
@@ -255,7 +235,6 @@ DimPlot(scrna,reduction = 'tsne',label = F,cols = mycolors,group.by = "cell_type
   guides(color = guide_legend(override.aes = list(size = 5)))
 dev.off()
 
-
 marker <- unique(c(
   'LUM',"DCN", 
   "CD7","CD2", "CD3D", "CD3E",  "NKG7",
@@ -265,7 +244,6 @@ marker <- unique(c(
   'C1QA','C1QB','C1QC',
   "IGKC", "CD79A","BANK1",'MS4A1',
   "TPSAB1", "TPSB2", "MS4A2"))
-
 
 pdf('01_celltype_marker_DotPlot.pdf',width = 12,height = 3.7)
 DotPlot(scrna, features = marker,group.by = 'cell_type')+RotatedAxis()+

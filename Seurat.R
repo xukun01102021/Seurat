@@ -12,7 +12,6 @@ library(tidyverse)
 library(AnnoProbe)
 library(tidydr)
 
-
 #Data processing and quality control---
 
 setwd('/data/scrna/')
@@ -57,20 +56,15 @@ dev.off()
 
 saveRDS(object = scrna ,file = "scrna_filtered.rds")
 
-
-
-
 #Standardization, dimensionality, reduction and clustering---
 
 setwd('/data/scrna/01_seurat')
-
 
 scrna<-readRDS('/data/scrna/scrna_filtered.rds')
 scrna <- NormalizeData(scrna, normalization.method = "LogNormalize", scale.factor = 10000)
 scrna <- FindVariableFeatures(scrna, selection.method = "vst", nfeatures = 2000)
 all.genes <- rownames(scrna)
 scrna <- ScaleData(scrna, features = all.genes)
-
 
 g2m_genes <- cc.genes$g2m.genes 
 g2m_genes <- CaseMatch(search=g2m_genes, match=rownames(scrna))
